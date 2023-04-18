@@ -3,6 +3,7 @@ package gawquon.mapletherm.ui
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,7 +24,7 @@ fun TemperatureScreen(temperatureViewModel: TemperatureViewModel = viewModel()) 
     val orientation = LocalContext.current.resources.configuration.orientation
 
     val fontSize = getFontSize(24, 13, orientation)
-    Box(modifier = Modifier.padding(bottom = 40.dp)) {
+    Box(modifier = Modifier.fillMaxSize()) {
         Text(
             text = "Getting deg. F",
             textAlign = TextAlign.Center,

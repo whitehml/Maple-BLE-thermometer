@@ -9,32 +9,38 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.em
-import androidx.core.content.getSystemService
+import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 
 const val PORTRAIT = 1
 const val LANDSCAPE = 2
 
 @Composable
-fun MapleScaffold(orientation: Int) {
+fun MapleScaffold(
+    orientation: Int,
+    navController: NavHostController
+) {
     val sensorManager =
         LocalContext.current.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     val hasPressureSensor = sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE) != null
 
     if (orientation == PORTRAIT) {
-        PortraitScaffold(hasPressureSensor)
+        PortraitScaffold(hasPressureSensor, navController = navController)
     } else {
-        LandscapeScaffold(hasPressureSensor)
+        LandscapeScaffold(hasPressureSensor, navController = navController)
     }
 }
 
 @Composable
-fun PortraitScaffold(hasPressureSensor: Boolean) {
+fun PortraitScaffold(hasPressureSensor: Boolean, navController: NavHostController) {
     Column {
         val width = setWidthIfSensor(0.8f, hasPressureSensor)
         Box(
@@ -42,7 +48,7 @@ fun PortraitScaffold(hasPressureSensor: Boolean) {
                 .fillMaxWidth()
                 .fillMaxHeight(width)
         ) {
-            ConnectionScreen()
+            NavHostComp(navController = navController)
         }
         if (hasPressureSensor) {
             Box(modifier = Modifier.fillMaxSize()) {
@@ -53,7 +59,7 @@ fun PortraitScaffold(hasPressureSensor: Boolean) {
 }
 
 @Composable
-fun LandscapeScaffold(hasPressureSensor: Boolean) {
+fun LandscapeScaffold(hasPressureSensor: Boolean, navController: NavHostController) {
     Row {
         val width = setWidthIfSensor(0.8f, hasPressureSensor)
         Box(
@@ -61,7 +67,7 @@ fun LandscapeScaffold(hasPressureSensor: Boolean) {
                 .fillMaxWidth(width)
                 .fillMaxHeight()
         ) {
-            ConnectionScreen()
+            NavHostComp(navController = navController)
         }
         if (hasPressureSensor) {
             Box(modifier = Modifier.fillMaxSize()) {
@@ -71,8 +77,8 @@ fun LandscapeScaffold(hasPressureSensor: Boolean) {
     }
 }
 
-fun setWidthIfSensor(width: Float, hasPressureSensor: Boolean): Float{
-    if(hasPressureSensor){
+fun setWidthIfSensor(width: Float, hasPressureSensor: Boolean): Float {
+    if (hasPressureSensor) {
         return width
     }
     return 1.0f

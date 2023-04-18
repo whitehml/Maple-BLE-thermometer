@@ -38,7 +38,10 @@ import com.example.mapletherm.R
 import gawquon.mapletherm.core.viewmodel.ConnectionViewModel
 
 @Composable
-fun ConnectionScreen(connectionViewModel: ConnectionViewModel = viewModel()) {
+fun ConnectionScreen(
+    connectionViewModel: ConnectionViewModel = viewModel(),
+    onClickFoundTherm: () -> Unit = {}
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         val connectionUiState by connectionViewModel.uiState.collectAsState()
         val orientation = LocalContext.current.resources.configuration.orientation
@@ -47,7 +50,11 @@ fun ConnectionScreen(connectionViewModel: ConnectionViewModel = viewModel()) {
             orientation,
             isScanning = connectionUiState.isScanning,
             onScanClick = { connectionViewModel.toggleScan() })
-        DiscoveredTherms(discoveredTherms = listOf(1, 2, 3, 3, 5, 6, 7, 8), orientation)
+        DiscoveredTherms(
+            discoveredTherms = listOf(1, 2, 3, 3, 5, 6, 7, 8),
+            orientation = orientation,
+            onClickFoundTherm = onClickFoundTherm
+        )
     }
 }
 
@@ -81,24 +88,28 @@ fun getScanText(isScanning: Boolean): String {
 }
 
 @Composable
-fun DiscoveredTherms(discoveredTherms: List<Int>, orientation: Int) { //Placeholder Int
+fun DiscoveredTherms(
+    discoveredTherms: List<Int>,
+    orientation: Int,
+    onClickFoundTherm: () -> Unit
+) { //Placeholder Int
     LazyColumn() {
         items(discoveredTherms) { discoveredTherm ->
-            DiscoveredTherm(discoveredTherm, orientation)
+            DiscoveredTherm(discoveredTherm, orientation, onClickFoundTherm)
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DiscoveredTherm(item: Int, orientation: Int) {
+fun DiscoveredTherm(item: Int, orientation: Int, onClickFoundTherm: () -> Unit) {
     Card(
         shape = RectangleShape,
         modifier = Modifier
             .fillMaxWidth()
             .defaultMinSize(minHeight = 70.dp)
             .padding(vertical = 5.dp, horizontal = 15.dp)
-            .clickable { },
+            .clickable { onClickFoundTherm() },
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
     ) {
         Row(modifier = Modifier.padding(horizontal = 10.dp)) {
