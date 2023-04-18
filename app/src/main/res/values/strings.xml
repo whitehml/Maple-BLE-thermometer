@@ -2,5 +2,6 @@
     <string name="app_name">MapleTherm</string>
     <string name="temp_units">°F</string>
     <string name="start_scan">Start Scanning</string>
+    <string name="end_scan">Stop Scanning</string>
     <string name="decibels">%d db</string>
 </resources>

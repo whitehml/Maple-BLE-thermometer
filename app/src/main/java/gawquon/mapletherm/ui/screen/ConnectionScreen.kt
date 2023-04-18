@@ -20,12 +20,15 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -35,19 +38,25 @@ import com.example.mapletherm.R
 import gawquon.mapletherm.core.viewmodel.ConnectionViewModel
 
 @Composable
-fun ConnectionScreen(connectionViewModel: ConnectionViewModel = viewModel(), orientation: Int) {
+fun ConnectionScreen(connectionViewModel: ConnectionViewModel = viewModel()) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        ScanButton(orientation)
+        val connectionUiState by connectionViewModel.uiState.collectAsState()
+        val orientation = LocalContext.current.resources.configuration.orientation
+
+        ScanButton(
+            orientation,
+            isScanning = connectionUiState.isScanning,
+            onScanClick = { connectionViewModel.toggleScan() })
         DiscoveredTherms(discoveredTherms = listOf(1, 2, 3, 3, 5, 6, 7, 8), orientation)
     }
 }
 
 @Composable
-fun ScanButton(orientation: Int) {
+fun ScanButton(orientation: Int, isScanning: Boolean, onScanClick: () -> Unit) {
+    var scanButtonText = getScanText(isScanning)
+
     Button(
-        onClick = {
-            // on-click code here, but first set up the activities
-        },
+        onClick = onScanClick,
         modifier = Modifier
             .fillMaxWidth(0.95f)
             .fillMaxHeight(0.20f)
@@ -56,7 +65,7 @@ fun ScanButton(orientation: Int) {
         shape = RoundedCornerShape(30)
     ) {
         Text(
-            text = stringResource(R.string.start_scan),
+            text = scanButtonText,
             fontSize = getFontSize(7, 10, orientation),
             color = Color.White
         )
@@ -64,10 +73,18 @@ fun ScanButton(orientation: Int) {
 }
 
 @Composable
+fun getScanText(isScanning: Boolean): String {
+    if (isScanning) {
+        return stringResource(R.string.end_scan)
+    }
+    return stringResource(R.string.start_scan)
+}
+
+@Composable
 fun DiscoveredTherms(discoveredTherms: List<Int>, orientation: Int) { //Placeholder Int
     LazyColumn() {
         items(discoveredTherms) { discoveredTherm ->
-            DiscoveredTherm(discoveredTherm,orientation)
+            DiscoveredTherm(discoveredTherm, orientation)
         }
     }
 }
@@ -86,18 +103,14 @@ fun DiscoveredTherm(item: Int, orientation: Int) {
     ) {
         Row(modifier = Modifier.padding(horizontal = 10.dp)) {
             Column {
-                Text(text = "Placeholder Device Name", fontSize =getFontSize(7, 6, orientation))
-                Text(text = "Placeholder ID", fontSize =getFontSize(6, 5, orientation))
+                Text(text = "Placeholder Device Name", fontSize = getFontSize(7, 6, orientation))
+                Text(text = "Placeholder ID", fontSize = getFontSize(6, 5, orientation))
             }
             Spacer(modifier = Modifier.weight(1f))
-            Text(text = stringResource(R.string.decibels, 0), fontSize = getFontSize(9, 9, orientation))
+            Text(
+                text = stringResource(R.string.decibels, 0),
+                fontSize = getFontSize(9, 9, orientation)
+            )
         }
     }
-}
-
-fun getFontSize(land: Int, port: Int, orientation: Int): TextUnit {
-    if (orientation == 1) {
-        return port.em
-    }
-    return land.em
 }
