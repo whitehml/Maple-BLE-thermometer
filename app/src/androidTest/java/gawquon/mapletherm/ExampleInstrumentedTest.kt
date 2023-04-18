@@ -1,4 +1,4 @@
-package com.example.mapletherm
+package gawquon.mapletherm
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

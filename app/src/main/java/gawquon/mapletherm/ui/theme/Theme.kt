@@ -1,4 +1,4 @@
-package com.example.mapletherm.ui.theme
+package gawquon.mapletherm.ui.theme
 
 import android.app.Activity
 import android.os.Build

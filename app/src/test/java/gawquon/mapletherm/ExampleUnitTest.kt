@@ -1,4 +1,4 @@
-package com.example.mapletherm
+package gawquon.mapletherm
 
 import org.junit.Test
 
