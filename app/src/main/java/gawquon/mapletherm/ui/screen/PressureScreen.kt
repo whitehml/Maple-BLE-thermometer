@@ -1,4 +1,4 @@
-package gawquon.mapletherm.ui
+package gawquon.mapletherm.ui.screen
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,27 +13,32 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.lifecycle.viewmodel.compose.viewModel
+import gawquon.mapletherm.core.sensor.PressureSensor
+import gawquon.mapletherm.core.viewmodel.PressureUiState
 import gawquon.mapletherm.core.viewmodel.PressureViewModel
+import gawquon.mapletherm.ui.PORTRAIT
 
 @Composable
 fun PressureScreen(pressureViewModel: PressureViewModel = viewModel()) {
     val pressureUiState by pressureViewModel.uiState.collectAsState()
     val orientation = LocalContext.current.resources.configuration.orientation
 
+    val pressureSensor = PressureSensor(context = LocalContext.current) // pass viewmodel fxn?
+
     if (orientation == PORTRAIT) {
-        PressurePortrait(pressureViewModel)
+        PressurePortrait(pressureUiState)
     } else {
-        PressureLandscape(pressureViewModel)
+        PressureLandscape(pressureUiState)
     }
 }
 
 @Composable
-fun PressurePortrait(pressureViewModel: PressureViewModel) {
+fun PressurePortrait(pressureUiState: PressureUiState) {
     val fontSize = 6.em
 
     Row(modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp)) {
         Column() {
-            Text(text = "Pressure mmHg", fontSize = fontSize)
+            Text(text = pressureUiState.pressureMmHg.toString(), fontSize = fontSize)
             Spacer(modifier = Modifier.weight(0.3f))
             Text(text = "Pressure atms", fontSize = fontSize)
         }
@@ -47,7 +52,7 @@ fun PressurePortrait(pressureViewModel: PressureViewModel) {
 }
 
 @Composable
-fun PressureLandscape(pressureViewModel: PressureViewModel) {
+fun PressureLandscape(pressureUiState: PressureUiState) {
     val fontSize = 6.em
 
     Column(modifier = Modifier.padding(15.dp)) {

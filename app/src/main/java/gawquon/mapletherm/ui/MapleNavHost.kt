@@ -5,6 +5,8 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import gawquon.mapletherm.ui.screen.ConnectionScreen
+import gawquon.mapletherm.ui.screen.TemperatureScreen
 
 @Composable
 fun NavHostComp(navController: NavHostController) {

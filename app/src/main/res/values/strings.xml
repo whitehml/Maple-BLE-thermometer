@@ -4,4 +4,6 @@
     <string name="start_scan">Start Scanning</string>
     <string name="end_scan">Stop Scanning</string>
     <string name="decibels">%d db</string>
+    <string name="pressure_mmhg">%d mmHg</string>
+    <string name="pressure_atms">%d atms</string>
 </resources>
