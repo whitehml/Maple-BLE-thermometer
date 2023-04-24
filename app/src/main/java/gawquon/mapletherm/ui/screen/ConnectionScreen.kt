@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,7 +22,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -30,6 +31,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapletherm.R
 import gawquon.mapletherm.core.viewmodel.ConnectionViewModel
 import gawquon.mapletherm.ui.getFontSize
+import gawquon.mapletherm.ui.theme.Fall
 
 @Composable
 fun ConnectionScreen(
@@ -54,7 +56,7 @@ fun ConnectionScreen(
 
 @Composable
 fun ScanButton(orientation: Int, isScanning: Boolean, onScanClick: () -> Unit) {
-    var scanButtonText = getScanText(isScanning)
+    val scanButtonText = getScanText(isScanning)
 
     Button(
         onClick = onScanClick,
@@ -67,8 +69,7 @@ fun ScanButton(orientation: Int, isScanning: Boolean, onScanClick: () -> Unit) {
     ) {
         Text(
             text = scanButtonText,
-            fontSize = getFontSize(7, 10, orientation),
-            color = Color.White
+            fontSize = getFontSize(7, 10, orientation)
         )
     }
 }
@@ -98,6 +99,7 @@ fun DiscoveredTherms(
 @Composable
 fun DiscoveredTherm(item: Int, orientation: Int, onClickFoundTherm: () -> Unit) {
     Card(
+        colors = CardDefaults.cardColors(containerColor = Fall),
         shape = RectangleShape,
         modifier = Modifier
             .fillMaxWidth()

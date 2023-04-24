@@ -1,7 +1,12 @@
 package gawquon.mapletherm.core.viewmodel
 
+import android.os.Handler
+import android.os.Looper
+import android.os.Message
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import gawquon.mapletherm.core.data.vaporPressures
+import gawquon.mapletherm.core.sensor.PressureSensor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -10,6 +15,19 @@ import kotlinx.coroutines.flow.update
 class PressureViewModel() : ViewModel() {
     private val _uiState = MutableStateFlow(PressureUiState())
     val uiState: StateFlow<PressureUiState> = _uiState.asStateFlow()
+
+    // Looper comes from main thread
+    private val handler: Handler = object: Handler(Looper.getMainLooper()) {
+        override fun handleMessage(msg: Message) {
+            val sensorData = msg.obj as Float
+            // Log.d("GWQ", sensorData.toString())
+            calcPressureDerivatives(sensorData)
+        }
+    }
+
+    init {
+        PressureSensor.setHandler(handler)
+    }
 
     private fun mBarTommHg(mBar: Float): Float {
         return mBar * 0.750062f

@@ -5,28 +5,45 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.os.Handler
+import android.os.HandlerThread
 import android.util.Log
-import gawquon.mapletherm.core.data.vaporPressures
 
-class PressureSensor(private val context: Context) : SensorEventListener {
+class PressureSensor(context: Context) : SensorEventListener {
     private var sensorManager: SensorManager =
         context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private var mPressure: Sensor? = null
 
-    val sensorExistsOnDevice: Boolean
+    private var sensorThread: HandlerThread? = null
+    private var sensorHandler: Handler? = null
+    companion object {
+        private var handler: Handler? = null
+        fun setHandler(handler: Handler) {
+            this.handler = handler
+        }
+    }
+
+    private val sensorExistsOnDevice: Boolean
         get() = sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE) != null
 
     init {
-        mPressure = sensorManager!!.getDefaultSensor(Sensor.TYPE_PRESSURE)
+        mPressure = sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE)
         startListening()
     }
 
-
-    private fun startListening() {
+    fun startListening() {
         if (!sensorExistsOnDevice) {
+            Log.i("PressureSenor", "No pressure sensor detected, will not register listener.")
             return
         }
-        sensorManager.registerListener(this, mPressure, SensorManager.SENSOR_DELAY_NORMAL)
+        sensorThread = HandlerThread("PressureSensor", Thread.NORM_PRIORITY)
+        sensorThread!!.start()
+        sensorHandler = Handler(sensorThread!!.looper) // Blocks until looper is prepared
+        sensorManager.registerListener(
+            this,
+            mPressure, 1000000, // Sample once a second
+            sensorHandler
+        )
     }
 
     fun stopListening() { // In a single activity setup, call this when navigating away
@@ -37,51 +54,16 @@ class PressureSensor(private val context: Context) : SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent?) {
         if (event != null && event.values.isNotEmpty()) {
-            //Log.d("GWQ", event.values[0].toString())
-            //Log.d("GWQ", mBarTommHg(event.values[0]).toString())
-            Log.d("GWQ", getBoilingPointWater(mBarTommHg(event.values[0])).toString())
+            // Send message to Pressure ViewModel
+            sendMessage(event.values[0])
         }
     }
 
-    private fun mBarTommHg(mBar: Float): Float {
-        return mBar * 0.750062f
-    }
+    private fun sendMessage(value: Float) {
+        if (handler == null) return
 
-    private fun mBarToAtm(mBar: Float): Float {
-        return mBar / 1013.25f
-    }
-
-    private fun getBoilingPointWater(mmHg: Float): Float {
-        val keys = vaporPressures.keys.toList().sorted()
-        val (lowP, highP) = getAdjacentPressures(keys, mmHg)
-
-        // Get temperatures in Celsius
-        val lowT = vaporPressures[lowP]!!
-        val highT = vaporPressures[highP]!!
-
-        // Interpolate
-        val bpT = ((mmHg - lowP) / (highP - lowP)) * (highT - lowT) + lowT
-        return degCtoF(bpT)
-    }
-
-    private fun degCtoF(c: Float): Float {
-        return c * (9f / 5f) + 32
-    }
-
-    private fun getAdjacentPressures(pressures: List<Float>, target: Float): Pair<Float, Float> {
-        // Quick and dirty since I'm not used to kotlin, be nice to use a set/binary
-        var low = pressures.first()
-        var high = pressures.last()
-
-        for (pressure in pressures) {
-            if (pressure < target) {
-                low = pressure
-            }
-            if (pressure > target) {
-                high = pressure
-                break
-            }
+        handler?.obtainMessage(0, value)?.apply {
+            sendToTarget()
         }
-        return Pair(low, high)
     }
 }

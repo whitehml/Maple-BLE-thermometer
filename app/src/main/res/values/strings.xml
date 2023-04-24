@@ -1,9 +1,9 @@
 <resources>
     <string name="app_name">MapleTherm</string>
-    <string name="temp_units">°F</string>
+    <string name="temp_f">°F</string>
     <string name="start_scan">Start Scanning</string>
     <string name="end_scan">Stop Scanning</string>
     <string name="decibels">%d db</string>
-    <string name="pressure_mmhg">%d mmHg</string>
-    <string name="pressure_atms">%d atms</string>
+    <string name="pressure_mmhg">mmHg</string>
+    <string name="pressure_atms">atms</string>
 </resources>

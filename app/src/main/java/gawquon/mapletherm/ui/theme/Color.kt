@@ -8,4 +8,4 @@ val Fall = Color(0xFF977D68)
 
 val Red = Color(0xFF9C3939)
 val BrickRed = Color(0xFF543232)
-val Beige = Color(0xFFB38C8C)
+val Beige = Color(0xFFDCCBBA)
