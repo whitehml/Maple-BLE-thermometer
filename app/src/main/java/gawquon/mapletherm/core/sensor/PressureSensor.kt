@@ -8,18 +8,22 @@ import android.hardware.SensorManager
 import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
+import gawquon.mapletherm.core.msg.MsgTypes
 
 class PressureSensor(context: Context) : SensorEventListener {
     private var sensorManager: SensorManager =
         context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private var mPressure: Sensor? = null
 
+    // Thread to listen on
     private var sensorThread: HandlerThread? = null
     private var sensorHandler: Handler? = null
+
+    // Static Handler to send messages out via
     companion object {
-        private var handler: Handler? = null
+        private var outHandler: Handler? = null
         fun setHandler(handler: Handler) {
-            this.handler = handler
+            this.outHandler = handler
         }
     }
 
@@ -60,9 +64,9 @@ class PressureSensor(context: Context) : SensorEventListener {
     }
 
     private fun sendMessage(value: Float) {
-        if (handler == null) return
+        if (outHandler == null) return
 
-        handler?.obtainMessage(0, value)?.apply {
+        outHandler?.obtainMessage(MsgTypes.PRESSURE_DATA.ordinal, value)?.apply {
             sendToTarget()
         }
     }

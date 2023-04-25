@@ -16,6 +16,7 @@ import android.os.Looper
 import android.os.Message
 import android.util.Log
 import androidx.core.app.ActivityCompat
+import gawquon.mapletherm.core.msg.MsgTypes
 import gawquon.mapletherm.core.viewmodel.ConnectionViewModel
 
 class BluetoothLeScanner(context: Context) {
@@ -24,12 +25,24 @@ class BluetoothLeScanner(context: Context) {
     private val _bluetoothLeAdapter = _bluetoothLeManager.adapter
     private val _bluetoothLeScanner = _bluetoothLeAdapter.bluetoothLeScanner
 
+    // Static handler to send messages out
+    companion object {
+        private var outHandler: Handler? = null
+        fun setHandler(handler: Handler) {
+            this.outHandler = handler
+        }
+    }
+
     // Handler
     // Looper comes from main thread
-    private val handler: Handler = object: Handler(Looper.getMainLooper()) {
+    private val handler: Handler = object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
-            val scanData = msg.obj as ScanResult
-            Log.d("GWQ", scanData.rssi.toString()) // Signal strength
+            val scanSignal = msg.obj as Boolean
+            if (scanSignal) {
+                startLeScan(context)
+            } else {
+                stopLeScan()
+            }
         }
     }
 
@@ -72,16 +85,16 @@ class BluetoothLeScanner(context: Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun startLeScan(context: Context): Boolean { // Return true if successful
+    fun startLeScan(context: Context) {
         if (checkPermissions(context)) {
             _bluetoothLeScanner.startScan(leScanCallback)
-            return true
+            return
         }
-        return false
+        sendStopMessage()
     }
 
     @SuppressLint("MissingPermission")
-    fun stopLeScan(): Unit {
+    fun stopLeScan() {
         _bluetoothLeScanner.stopScan(leScanCallback)
     }
 
@@ -118,5 +131,13 @@ class BluetoothLeScanner(context: Context) {
         }
 
         ActivityCompat.requestPermissions(context as Activity, permissions, 1)
+    }
+
+    private fun sendStopMessage() {
+        if (outHandler == null) return
+
+        outHandler?.obtainMessage(MsgTypes.STOP_SCAN.ordinal)?.apply {
+            sendToTarget()
+        }
     }
 }

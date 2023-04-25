@@ -1,5 +1,6 @@
 package gawquon.mapletherm.ui.screen
 
+import android.bluetooth.le.ScanResult
 import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -15,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,9 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -86,11 +84,11 @@ fun getScanText(isScanning: Boolean): String {
 
 @Composable
 fun DiscoveredTherms(
-    discoveredTherms: List<Int>,
+    discoveredTherms: List<ScanResult>,
     orientation: Int,
     onClickFoundTherm: () -> Unit
 ) { //Placeholder Int
-    LazyColumn() {
+    LazyColumn {
         items(discoveredTherms) { discoveredTherm ->
             DiscoveredTherm(discoveredTherm, orientation, onClickFoundTherm)
         }
@@ -99,7 +97,7 @@ fun DiscoveredTherms(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DiscoveredTherm(item: Int, orientation: Int, onClickFoundTherm: () -> Unit) {
+fun DiscoveredTherm(device: ScanResult, orientation: Int, onClickFoundTherm: () -> Unit) {
     Card(
         colors = CardDefaults.cardColors(containerColor = Fall),
         shape = RectangleShape,

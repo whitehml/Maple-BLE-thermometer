@@ -1,9 +1,11 @@
 package gawquon.mapletherm.core.viewmodel
 
-import android.content.Context
 import android.os.Handler
-import android.os.HandlerThread
+import android.os.Looper
+import android.os.Message
 import androidx.lifecycle.ViewModel
+import gawquon.mapletherm.core.msg.MsgTypes
+import gawquon.mapletherm.core.network.bluetooth.BluetoothLeScanner
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,32 +15,47 @@ class ConnectionViewModel() : ViewModel() {
     private val _uiState = MutableStateFlow(ConnectionUiState())
     val uiState: StateFlow<ConnectionUiState> = _uiState.asStateFlow()
 
-    // Sends signal
-    private var outThread: HandlerThread? = null
-    private var outHandler: Handler? = null
-
-    // Listens for scan info
+    // Static handler to send messages out
     companion object {
-        private var handler: Handler? = null
+        private var outHandler: Handler? = null
         fun setHandler(handler: Handler) {
-            this.handler = handler
+            this.outHandler = handler
         }
     }
 
-    fun toggleScan(context: Context) {
-        if(!_uiState.value.isScanning)
-        {
-            // start scan
-                _uiState.update { currentState -> currentState.copy( isScanning = !currentState.isScanning) }
-        }else {
-            // stop scan
-            _uiState.update { currentState -> currentState.copy( isScanning = !currentState.isScanning) }
+    // Handler to read signals in
+    // Looper comes from main thread
+    private val handler: Handler = object : Handler(Looper.getMainLooper()) {
+        override fun handleMessage(msg: Message) {
+            if (msg.what == MsgTypes.STOP_SCAN.ordinal)
+                stopScan()
         }
+    }
 
+    init {
+        BluetoothLeScanner.setHandler(handler)
+    }
+
+    fun toggleScan() {
+        _uiState.update { currentState -> currentState.copy(isScanning = !currentState.isScanning) }
+        sendScanMessage(_uiState.value.isScanning)
+    }
+
+    fun stopScan() {
+        _uiState.update { currentState -> currentState.copy(isScanning = false) }
+        sendScanMessage(false)
     }
 
     fun connectToDevice() {
         // Connect to bluetooth device on button-press of the device "card"
         // Upon successful connection, Navigate ConnectionScreen to TemperatureScreen
+    }
+
+    private fun sendScanMessage(value: Boolean) {
+        if (outHandler == null) return
+
+        outHandler?.obtainMessage(MsgTypes.SCAN_SIGNAL.ordinal, value)?.apply {
+            sendToTarget()
+        }
     }
 }
