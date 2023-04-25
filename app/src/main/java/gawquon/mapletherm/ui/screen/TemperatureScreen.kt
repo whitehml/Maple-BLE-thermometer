@@ -19,7 +19,7 @@ fun TemperatureScreen(temperatureViewModel: TemperatureViewModel = viewModel()) 
     val connectionUiState by temperatureViewModel.uiState.collectAsState()
     val orientation = LocalContext.current.resources.configuration.orientation
 
-    val fontSize = getFontSize(24, 13, orientation)
+    val fontSize = getFontSize(22, 13, orientation)
     Box(modifier = Modifier.fillMaxSize()) {
         Text(
             text = "Getting deg. F",

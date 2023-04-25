@@ -1,8 +1,11 @@
 package gawquon.mapletherm.app
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -10,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.rememberNavController
+import gawquon.mapletherm.core.network.bluetooth.BluetoothLeService
 import gawquon.mapletherm.core.sensor.PressureSensor
 import gawquon.mapletherm.ui.MapleScaffold
 import gawquon.mapletherm.ui.theme.MapleThermTheme
@@ -17,6 +21,7 @@ import gawquon.mapletherm.ui.theme.MapleThermTheme
 
 class MainActivity : ComponentActivity() {
     private lateinit var pressureSensor: PressureSensor
+    private lateinit var bleManager: BluetoothLeService
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -24,6 +29,7 @@ class MainActivity : ComponentActivity() {
         }
         // Lifecycle of pressure sensor should be tied to lifecycle of the activity
         pressureSensor = PressureSensor(this)
+        bleManager = BluetoothLeService(this)
     }
 
     override fun onResume() {

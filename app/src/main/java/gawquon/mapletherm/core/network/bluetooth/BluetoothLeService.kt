@@ -1,21 +1,12 @@
 package gawquon.mapletherm.core.network.bluetooth
 
-import android.app.Service
-import android.content.Intent
-import android.os.Binder
-import android.os.IBinder
+import android.content.Context
 
-class BluetoothLeService : Service() {
 
-    private val binder = LocalBinder()
+class BluetoothLeService(context: Context) {
+    private val bluetoothLeScanner = BluetoothLeScanner(context)
 
-    override fun onBind(intent: Intent): IBinder? {
-        return binder
-    }
-
-    inner class LocalBinder : Binder() {
-        fun getService(): BluetoothLeService {
-            return this@BluetoothLeService
-        }
+    init {
+        bluetoothLeScanner.requestBt(context)
     }
 }

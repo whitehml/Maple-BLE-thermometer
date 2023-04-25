@@ -1,5 +1,6 @@
 package gawquon.mapletherm.ui.screen
 
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,19 +36,20 @@ import gawquon.mapletherm.ui.theme.Fall
 
 @Composable
 fun ConnectionScreen(
+    context: Context,
     connectionViewModel: ConnectionViewModel = viewModel(),
     onClickFoundTherm: () -> Unit = {}
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         val connectionUiState by connectionViewModel.uiState.collectAsState()
-        val orientation = LocalContext.current.resources.configuration.orientation
+        val orientation = context.resources.configuration.orientation
 
         ScanButton(
             orientation,
             isScanning = connectionUiState.isScanning,
             onScanClick = { connectionViewModel.toggleScan() })
         DiscoveredTherms(
-            discoveredTherms = listOf(1, 2, 3, 3, 5, 6, 7, 8),
+            discoveredTherms = connectionUiState.discoveredDevices,
             orientation = orientation,
             onClickFoundTherm = onClickFoundTherm
         )
@@ -69,7 +71,7 @@ fun ScanButton(orientation: Int, isScanning: Boolean, onScanClick: () -> Unit) {
     ) {
         Text(
             text = scanButtonText,
-            fontSize = getFontSize(7, 10, orientation)
+            fontSize = getFontSize(6, 10, orientation)
         )
     }
 }
@@ -110,13 +112,13 @@ fun DiscoveredTherm(item: Int, orientation: Int, onClickFoundTherm: () -> Unit) 
     ) {
         Row(modifier = Modifier.padding(horizontal = 10.dp)) {
             Column {
-                Text(text = "Placeholder Device Name", fontSize = getFontSize(7, 6, orientation))
+                Text(text = "Placeholder Device Name", fontSize = getFontSize(7, 5, orientation))
                 Text(text = "Placeholder ID", fontSize = getFontSize(6, 5, orientation))
             }
             Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = stringResource(R.string.decibels, 0),
-                fontSize = getFontSize(9, 9, orientation)
+                fontSize = getFontSize(9, 8, orientation)
             )
         }
     }

@@ -1,6 +1,7 @@
 package gawquon.mapletherm.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -12,7 +13,9 @@ import gawquon.mapletherm.ui.screen.TemperatureScreen
 fun NavHostComp(navController: NavHostController) {
     NavHost(navController = navController, startDestination = Connection.route) {
         composable(route = Connection.route) {
-            ConnectionScreen(onClickFoundTherm = { navController.navigateSingleTopTo(Thermometer.route) })
+            ConnectionScreen(
+                context = LocalContext.current,
+                onClickFoundTherm = { navController.navigateSingleTopTo(Thermometer.route) })
         }
         composable(route = Thermometer.route) {
             TemperatureScreen()
