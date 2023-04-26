@@ -1,10 +1,13 @@
 package gawquon.mapletherm.core.viewmodel
 
+import android.bluetooth.le.ScanResult
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.util.Log
 import androidx.lifecycle.ViewModel
-import gawquon.mapletherm.core.msg.MsgTypes
+import gawquon.mapletherm.core.data.MsgTypes
 import gawquon.mapletherm.core.network.bluetooth.BluetoothLeScanner
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,10 +28,16 @@ class ConnectionViewModel() : ViewModel() {
 
     // Handler to read signals in
     // Looper comes from main thread
+    @Suppress("UNCHECKED_CAST")
     private val handler: Handler = object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
-            if (msg.what == MsgTypes.STOP_SCAN.ordinal)
+            if (msg.what == MsgTypes.STOP_SCAN.ordinal) {
                 stopScan()
+            }
+            if (msg.what == MsgTypes.DISCOVERED_DEVICES.ordinal) {
+                val scannedDevices = msg.obj as List<ScanResult>
+                updateDeviceList(scannedDevices)
+            }
         }
     }
 
@@ -46,9 +55,8 @@ class ConnectionViewModel() : ViewModel() {
         sendScanMessage(false)
     }
 
-    fun connectToDevice() {
-        // Connect to bluetooth device on button-press of the device "card"
-        // Upon successful connection, Navigate ConnectionScreen to TemperatureScreen
+    private fun updateDeviceList(discoveredDevices: List<ScanResult>) {
+        _uiState.update { currentState -> currentState.copy(discoveredDevices = discoveredDevices) }
     }
 
     private fun sendScanMessage(value: Boolean) {

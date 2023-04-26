@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.em
 import androidx.navigation.NavHostController
+import gawquon.mapletherm.ui.nav.NavHostComp
 import gawquon.mapletherm.ui.screen.PressureScreen
 
 const val PORTRAIT = 1

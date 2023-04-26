@@ -1,5 +1,6 @@
 package gawquon.mapletherm.ui.screen
 
+import android.annotation.SuppressLint
 import android.bluetooth.le.ScanResult
 import android.content.Context
 import androidx.compose.foundation.clickable
@@ -36,7 +37,7 @@ import gawquon.mapletherm.ui.theme.Fall
 fun ConnectionScreen(
     context: Context,
     connectionViewModel: ConnectionViewModel = viewModel(),
-    onClickFoundTherm: () -> Unit = {}
+    onClickFoundTherm: (String) -> Unit = {}
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         val connectionUiState by connectionViewModel.uiState.collectAsState()
@@ -49,7 +50,8 @@ fun ConnectionScreen(
         DiscoveredTherms(
             discoveredTherms = connectionUiState.discoveredDevices,
             orientation = orientation,
-            onClickFoundTherm = onClickFoundTherm
+            onClickFoundTherm = onClickFoundTherm,
+            onLeaveScan = { connectionViewModel.stopScan() }
         )
     }
 }
@@ -86,18 +88,28 @@ fun getScanText(isScanning: Boolean): String {
 fun DiscoveredTherms(
     discoveredTherms: List<ScanResult>,
     orientation: Int,
-    onClickFoundTherm: () -> Unit
-) { //Placeholder Int
+    onClickFoundTherm: (String) -> Unit,
+    onLeaveScan: () -> Unit
+) {
     LazyColumn {
         items(discoveredTherms) { discoveredTherm ->
-            DiscoveredTherm(discoveredTherm, orientation, onClickFoundTherm)
+            DiscoveredTherm(discoveredTherm, orientation, onClickFoundTherm, onLeaveScan)
         }
     }
 }
 
+@SuppressLint("MissingPermission")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DiscoveredTherm(device: ScanResult, orientation: Int, onClickFoundTherm: () -> Unit) {
+fun DiscoveredTherm(
+    device: ScanResult,
+    orientation: Int,
+    onClickFoundTherm: (String) -> Unit,
+    onLeaveScan: () -> Unit
+) {
+    val name = device.device.name ?: "Unknown name"
+    val address = device.device.address ?: "Unknown mac address"
+
     Card(
         colors = CardDefaults.cardColors(containerColor = Fall),
         shape = RectangleShape,
@@ -105,17 +117,20 @@ fun DiscoveredTherm(device: ScanResult, orientation: Int, onClickFoundTherm: () 
             .fillMaxWidth()
             .defaultMinSize(minHeight = 70.dp)
             .padding(vertical = 5.dp, horizontal = 15.dp)
-            .clickable { onClickFoundTherm() },
+            .clickable {
+                onLeaveScan()
+                onClickFoundTherm(address)
+            },
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
     ) {
         Row(modifier = Modifier.padding(horizontal = 10.dp)) {
             Column {
-                Text(text = "Placeholder Device Name", fontSize = getFontSize(7, 5, orientation))
-                Text(text = "Placeholder ID", fontSize = getFontSize(6, 5, orientation))
+                Text(text = name, fontSize = getFontSize(7, 5, orientation))
+                Text(text = address, fontSize = getFontSize(6, 5, orientation))
             }
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = stringResource(R.string.decibels, 0),
+                text = stringResource(R.string.decibels, device.rssi),
                 fontSize = getFontSize(9, 8, orientation)
             )
         }

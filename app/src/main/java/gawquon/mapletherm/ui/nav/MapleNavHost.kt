@@ -1,4 +1,4 @@
-package gawquon.mapletherm.ui
+package gawquon.mapletherm.ui.nav
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
@@ -15,15 +15,19 @@ fun NavHostComp(navController: NavHostController) {
         composable(route = Connection.route) {
             ConnectionScreen(
                 context = LocalContext.current,
-                onClickFoundTherm = { navController.navigateSingleTopTo(Thermometer.route) })
+                onClickFoundTherm = { address -> navController.navigateToThermometer(address) })
         }
-        composable(route = Thermometer.route) {
-            TemperatureScreen()
+        composable(
+            route = Thermometer.routeWithArgs,
+            arguments = Thermometer.arguments
+        ) { navBackStackEntry ->
+            val deviceAddress = navBackStackEntry.arguments?.getString(Thermometer.deviceAddressArg)
+            TemperatureScreen(deviceAddress = deviceAddress)
         }
     }
 }
 
-fun NavHostController.navigateSingleTopTo(route: String) =
+fun NavHostController.navigateSingleTopTo(route: String) {
     this.navigate(route) {
         popUpTo(
             this@navigateSingleTopTo.graph.findStartDestination().id
@@ -32,3 +36,7 @@ fun NavHostController.navigateSingleTopTo(route: String) =
         }
         launchSingleTop = true
     }
+}
+fun NavHostController.navigateToThermometer(address: String) {
+    this.navigateSingleTopTo("${Thermometer.route}/$address")
+}

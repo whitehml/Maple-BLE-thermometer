@@ -6,7 +6,9 @@ import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
+import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -16,13 +18,12 @@ import android.os.Looper
 import android.os.Message
 import android.util.Log
 import androidx.core.app.ActivityCompat
-import gawquon.mapletherm.core.msg.MsgTypes
+import gawquon.mapletherm.core.data.MsgTypes
 import gawquon.mapletherm.core.viewmodel.ConnectionViewModel
 
 class BluetoothLeScanner(context: Context) {
-    private val _bluetoothLeManager =
-        context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-    private val _bluetoothLeAdapter = _bluetoothLeManager.adapter
+    val bluetoothLeManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+    private val _bluetoothLeAdapter = bluetoothLeManager.adapter
     private val _bluetoothLeScanner = _bluetoothLeAdapter.bluetoothLeScanner
 
     // Static handler to send messages out
@@ -53,22 +54,33 @@ class BluetoothLeScanner(context: Context) {
     // Callbacks
     private val _scanResults = mutableListOf<ScanResult>()
 
+    private val scanFilters = listOf<ScanFilter>(
+        ScanFilter.Builder().setDeviceName("MAVERICK").build()
+    ) // Very specific to my case
+
+    private val scanSettings = ScanSettings.Builder()
+        .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+        .build()
+
     private val leScanCallback = object : ScanCallback() {
+        @SuppressLint("MissingPermission")
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             val indexQuery =
                 _scanResults.indexOfFirst { it.device.address == result.device.address }
             if (indexQuery != -1) { // A scan result already exists with the same address
                 _scanResults[indexQuery] = result
-                // send result to Handler
+                // Send results to handler
+                sendKnownDevicesMessage(_scanResults)
             } else {
                 with(result.device) {
                     Log.i(
                         "leScan",
-                        "Found BLE device! Name: address: $address"
+                        "Found BLE device! Name: ${name ?: "Unnamed"} address: $address"
                     ) //${name ?: "Unnamed"}, address: $address")
                 }
                 _scanResults.add(result)
-                // Send result to handler
+                // Send results to handler
+                sendKnownDevicesMessage(_scanResults)
             }
         }
 
@@ -77,7 +89,7 @@ class BluetoothLeScanner(context: Context) {
         }
     }
 
-    fun requestBt(context: Context): Unit {
+    fun requestBt(context: Context) {
         if (!_bluetoothLeAdapter.isEnabled) {
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
             ActivityCompat.startActivityForResult(context as Activity, enableBtIntent, 1, null)
@@ -87,7 +99,7 @@ class BluetoothLeScanner(context: Context) {
     @SuppressLint("MissingPermission")
     fun startLeScan(context: Context) {
         if (checkPermissions(context)) {
-            _bluetoothLeScanner.startScan(leScanCallback)
+            _bluetoothLeScanner.startScan(scanFilters, scanSettings, leScanCallback)
             return
         }
         sendStopMessage()
@@ -120,14 +132,14 @@ class BluetoothLeScanner(context: Context) {
         return true
     }
 
-    private fun requestLePermissions(context: Context): Unit {
+    private fun requestLePermissions(context: Context) {
         val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            arrayOf<String>(
+            arrayOf(
                 Manifest.permission.BLUETOOTH_CONNECT,
                 Manifest.permission.BLUETOOTH_SCAN
             )
         } else {
-            arrayOf<String>(Manifest.permission.ACCESS_FINE_LOCATION)
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
         }
 
         ActivityCompat.requestPermissions(context as Activity, permissions, 1)
@@ -137,6 +149,14 @@ class BluetoothLeScanner(context: Context) {
         if (outHandler == null) return
 
         outHandler?.obtainMessage(MsgTypes.STOP_SCAN.ordinal)?.apply {
+            sendToTarget()
+        }
+    }
+
+    private fun sendKnownDevicesMessage(devices: List<ScanResult>) {
+        if (outHandler == null) return
+
+        outHandler?.obtainMessage(MsgTypes.DISCOVERED_DEVICES.ordinal, devices)?.apply {
             sendToTarget()
         }
     }

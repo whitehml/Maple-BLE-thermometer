@@ -5,7 +5,7 @@ import android.os.Looper
 import android.os.Message
 import androidx.lifecycle.ViewModel
 import gawquon.mapletherm.core.data.vaporPressures
-import gawquon.mapletherm.core.msg.MsgTypes
+import gawquon.mapletherm.core.data.MsgTypes
 import gawquon.mapletherm.core.sensor.PressureSensor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

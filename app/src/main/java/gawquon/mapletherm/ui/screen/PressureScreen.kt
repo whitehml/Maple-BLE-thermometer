@@ -21,8 +21,8 @@ import com.example.mapletherm.R
 import gawquon.mapletherm.core.viewmodel.PressureUiState
 import gawquon.mapletherm.core.viewmodel.PressureViewModel
 import gawquon.mapletherm.ui.PORTRAIT
-import gawquon.mapletherm.ui.addUnits
-import gawquon.mapletherm.ui.format
+import gawquon.mapletherm.ui.misc.addUnits
+import gawquon.mapletherm.ui.misc.format
 import gawquon.mapletherm.ui.theme.BrickRed
 
 @Composable

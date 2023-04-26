@@ -1,5 +1,5 @@
 package gawquon.mapletherm.core.viewmodel
 
 data class TemperatureUiState(
-    val temperatureF: Float = 0f,
+    val temperatureF: Double = 0.0,
 )

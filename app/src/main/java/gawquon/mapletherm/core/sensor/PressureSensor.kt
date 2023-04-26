@@ -8,7 +8,7 @@ import android.hardware.SensorManager
 import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
-import gawquon.mapletherm.core.msg.MsgTypes
+import gawquon.mapletherm.core.data.MsgTypes
 
 class PressureSensor(context: Context) : SensorEventListener {
     private var sensorManager: SensorManager =
