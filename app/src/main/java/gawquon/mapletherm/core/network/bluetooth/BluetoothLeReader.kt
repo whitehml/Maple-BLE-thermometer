@@ -148,6 +148,7 @@ class BluetoothLeReader(manager: BluetoothManager) {
             )
             descriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE // Might have to do non-deprecated version as well for Android 13+
             _bluetoothLeGatt!!.writeDescriptor(descriptor)
+            _subscribed = true
         } else Log.w(TAG, "Could not find temperature field on bluetooth device.")
     }
 
