@@ -81,7 +81,6 @@ class BluetoothLeReader(manager: BluetoothManager) {
                 _isConnected = true
                 // Log.d(TAG, "Connected to BLE GATT server")
                 _bluetoothLeGatt?.discoverServices()
-                subscribeToNotifications()
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 // disconnected from the GATT Server
                 _isConnected = false
