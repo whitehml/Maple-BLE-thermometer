@@ -76,12 +76,12 @@ class BluetoothLeReader(manager: BluetoothManager) {
     private val bluetoothGattCallback = object : BluetoothGattCallback() {
         @SuppressLint("MissingPermission")
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
-            if (newState == BluetoothProfile.STATE_CONNECTED) {
+            if (newState == BluetoothProfile.STATE_CONNECTED && !_isConnected) {
                 // successfully connected to the GATT Server
                 _isConnected = true
                 // Log.d(TAG, "Connected to BLE GATT server")
                 _bluetoothLeGatt?.discoverServices()
-            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+            } else if (newState == BluetoothProfile.STATE_DISCONNECTED && _isConnected) {
                 // disconnected from the GATT Server
                 _isConnected = false
                 _subscribed = false
