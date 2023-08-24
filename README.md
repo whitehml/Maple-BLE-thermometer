@@ -275,7 +275,7 @@ The pressure sensor is one few things that will require us to touch the `MainAct
         }
     }
 
-Great, now you can log pressure changes in the Activity, but the hard part is injecting this into the UI through our preferred viewModel method. For that we'll need Handlers.
+Great, now you can log pressure changes in the Activity. The hard part is injecting the live data into the UI through our preferred viewModel method. For that we'll need Handlers.
 # 4 - Handlers
 Handlers are listeners that allow you to send messages between disparate parts of code and process queues from multiple sources. *WARNING* My implementation here is almost certainly not to be emulated architecturally; there is nothing preventing two classes from fighting over the same handler.
 
@@ -328,7 +328,7 @@ If we needed to listen in more places, we could pass the same handler into more 
 # 5 - Understanding the Device
 
 ## Find Characteristic:
-Before we get into Bluetooth, we need to know what we want from the device. Here I recommend a BLE scanner app like punchthrough's [LightBlue](https://punchthrough.com/lightblue/) This will let you view all the internal characteristics of the device so you can see what your working with. A sensor reporting temperatures will have a Notifiable characteristic as opposed to a Read. Notifiable allows you to subscribe to the characteristic and receive events anytime the value changes. In my case there are two Notifiable characteristics but only one is listed as advertised: 0000fff1-0000-1000-8000-00805f9b34fb. Catchy. If we subscribe to it, we can indeed see that it updates as I change the temperature.
+Before we get into Bluetooth, we need to know what we want from the device. Here I recommend a BLE scanner app like punchthrough's [LightBlue](https://punchthrough.com/lightblue/) This will let you view all the internal characteristics of the device so you can see what you're working with. A sensor reporting temperatures will have a Notifiable characteristic as opposed to a Read. Notifiable allows you to subscribe to the characteristic and receive events anytime the value changes. In my case there are two Notifiable characteristics but only one is listed as advertised: 0000fff1-0000-1000-8000-00805f9b34fb. Catchy. If we subscribe to it, we can indeed see that it updates as I change the temperature.
 
 <img src="https://user-images.githubusercontent.com/71318452/235370515-bdac121e-990a-4f32-9708-32e39685717e.png" width="250"/>
 
@@ -349,13 +349,13 @@ So we have the reported data, how do we get the temperature? Well it's not repor
 | FB     | 02  | B4  | 02  | 00  | B8  | FE  | 69.2   |
 | FB     | 02  | B6  | 02  | 00  | BA  | FE  | 69.4   |
 | FB     | 02  | BA  | 02  | 00  | BE  | FE  | 69.8   |
-| FB     | 02  | 5F  | 03  | 00  | 64  | FE  | 86.5   |
+| FB     | 02  | 5F  | 03  | 00  | 64  | FE  | 86.3   |
 
 Only 3 bytes ever change (2, 3 and 5). The 5th byte looks promising at first, as temperature increases 0.2 degrees the 5th byte increases by 2 in the 33°F range, but this breaks down. If you ignore the 5th byte, it becomes obvious that bytes 2 & 3 completely describe the temperature in a little-endian-esque fashion. Byte 3 is more significant than Byte 2 and together they describe an integer 10x the temperature in Fahrenheit.
 
 | Byte 3 | Byte 2 | Decimal | °F |
 |--------|--------|---------|-|
-| 03     | 5F     | 865     | 86.5 |
+| 03     | 5F     | 863     | 86.3 |
 
 # 6 - Permissions
 *WARNING*. Do not emulate my permission requests. At this point I was running out of time for this project and just needed it to work on my father's device.
